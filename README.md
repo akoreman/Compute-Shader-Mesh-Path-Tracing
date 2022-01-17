@@ -1,2 +1,2 @@
-# Compute-Shader-Geometry-Ray-Tracing
+# Compute Shader Geometry Ray Tracing
 WIP
