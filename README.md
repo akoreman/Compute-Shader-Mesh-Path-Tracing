@@ -13,3 +13,5 @@ WIP. Working on a raytrace engine to raytrace meshes. Implemented using HLSL com
 
 # Screenshots
 
+<img src="https://raw.github.com/akoreman/Compute-Shader-Mesh-Ray-Tracing/main/images/SpecReflections.PNG" width="400">  
+
