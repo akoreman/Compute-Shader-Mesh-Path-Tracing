@@ -1,4 +1,4 @@
-# Compute Shader Geometry Ray Tracing
+# Compute Shader Mesh Ray Tracing
 WIP. Working on a raytrace engine to raytrace meshes. Implemented using HLSL compute shaders in Unity3D.
 
 **Currently implemented:**
