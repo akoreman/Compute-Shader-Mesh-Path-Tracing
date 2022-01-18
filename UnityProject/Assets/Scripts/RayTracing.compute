@@ -1,0 +1,178 @@
+#pragma kernel CSMain
+
+#define PI 3.141592
+#define inf 1000000
+#define MAX_BOUNCES 8
+
+// These are set from RayMarcher.cs /////////
+Texture2D<float4> Source;
+RWTexture2D<float4> Target;
+float4x4 _CameraToWorldProj;
+float4x4 _CameraInverseProj;
+
+float4 _CameraPosition;
+float4 _CameraRotation;
+
+Texture2D<float4> _SkyBoxTexture;
+SamplerState sampler_SkyBoxTexture;
+///////////////////////////////////////////
+
+struct Ray
+{
+	float3 Origin;
+	float3 Direction;
+	float3 Energy;
+};
+
+Ray CreateRay(float3 Origin, float3 Direction)
+{
+	Ray ray;
+
+	ray.Origin = Origin;
+	ray.Direction = Direction;
+	ray.Energy = float3(1,1,1);
+
+	return ray;
+}
+
+Ray CreateCameraRay(float2 xy)
+{
+	//float3 Origin = mul(_CameraToWorldProj, float4(0,0,0,1)).xyz;
+	float3 Origin = _CameraPosition.xyz;
+
+    float3 Direction = mul(_CameraInverseProj, float4(xy,0,1)).xyz;
+    Direction = mul(_CameraToWorldProj, float4(Direction,0)).xyz;
+    Direction = normalize(Direction);
+
+	return CreateRay(Origin,Direction);
+}
+
+struct RayCollision
+{
+	float3 Position;
+	float Distance;
+	float3 positionNormal;
+};
+
+RayCollision CreateRayCollision()
+{
+	RayCollision Collision;
+
+	Collision.Position = float3(0,0,0);
+	Collision.Distance = inf;
+	Collision.positionNormal = float3(0,0,0);
+
+	return Collision;
+};
+
+void GroundPlaneRayIntersection(Ray ray, inout RayCollision collision)
+{
+	float distance = -ray.Origin.y / ray.Direction.y;
+	if (distance > 0.0 && distance < collision.Distance)
+	{
+		collision.Distance = distance;
+		collision.Position = ray.Origin + distance * ray.Direction;
+		collision.positionNormal = float3(0,1,0);
+	}
+	
+}
+
+void SphereRayIntersection(Ray ray, inout RayCollision Collision, float3 spherePosition, float sphereRadius)
+{
+	float3 distanceVector = ray.Origin - spherePosition;
+
+	float p1 = -dot(ray.Direction, distanceVector);
+	float p2Squared = p1*p1 - dot(distanceVector,distanceVector) + sphereRadius*sphereRadius;
+
+	if (p2Squared < 0)
+		return;
+	
+	float p2 = sqrt(p2Squared);
+	float distance;
+	if(p1-p2 > 0)
+		distance = p1-p2;
+	else
+		distance = p1+p2;
+
+	if (distance > 0.0 && distance < Collision.Distance)
+	{
+		Collision.Distance = distance;
+		Collision.Position = ray.Origin + distance * ray.Direction;
+		Collision.positionNormal = normalize(Collision.Position-spherePosition);
+	}
+}
+
+RayCollision TraceRays(Ray ray)
+{
+	RayCollision collision = CreateRayCollision();
+	//GroundPlaneRayIntersection(ray, collision);
+	SphereRayIntersection(ray, collision, float3(0,1,0),.5);
+	SphereRayIntersection(ray, collision, float3(2,1,2),.5);
+	SphereRayIntersection(ray, collision, float3(0,1,2),.5);
+	SphereRayIntersection(ray, collision, float3(2,1,0),.5);
+	return collision;
+}
+
+float3 ShadeRay(inout Ray ray, RayCollision collision)
+{
+	if (collision.Distance < inf)
+	{
+		//return float4(0,0,1,0);		
+        float3 specular = float3(0.6f, 0.6f, 0.6f);
+
+		ray.Origin = collision.Position + collision.positionNormal + 0.001;
+
+		ray.Direction = reflect(ray.Direction, collision.positionNormal);
+
+        ray.Energy *= specular;
+        
+		//return float3(1,0,0);
+        return float3(0.0, 0.0, 0.0);
+
+	}
+	else
+	{
+		ray.Energy = 0.0;
+
+		float theta = acos(ray.Direction.y) / -PI;
+		float phi = atan2(ray.Direction.x, -ray.Direction.z) / -PI * 0.5f;
+		return _SkyBoxTexture.SampleLevel(sampler_SkyBoxTexture, float2(phi, theta), 1).xyz;
+	}
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    Target[id.xy] = Source[id.xy];
+
+	uint width,height;
+    Target.GetDimensions(width, height);
+
+	float marchDistance = 0;
+	int numMarchSteps = 0;
+
+	//Convert from coordinates [-width,width] and [-heigth,height] to [-1,1] and [-1,1].
+	float2 uv = id.xy / float2(width,height) * 2 - 1;
+
+    Ray cameraRay = CreateCameraRay(uv);
+	bool hit = false;
+	float3 pixelColor = float3(0,0,0);
+
+
+	int i = 0;
+	while (i < MAX_BOUNCES)
+	{
+		i++;
+
+		RayCollision Collision = TraceRays(cameraRay);
+		pixelColor += cameraRay.Energy * ShadeRay(cameraRay, Collision);
+
+		if (!any(cameraRay.Energy))
+			break;
+	}
+
+	//RayCollision Collision = TraceRays(cameraRay);
+	//float4 pixelColor += ShadeRay(cameraRay, Collision);
+
+	Target[id.xy] = float4(pixelColor,1);
+}
