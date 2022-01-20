@@ -4,11 +4,11 @@ WIP. Working on a raytrace engine to raytrace meshes. Implemented using HLSL com
 **Currently implemented:**
 - Raytracing for opaque planes and spheres.
 - Specular reflections.
+- Lambert diffuse relections.
 
 **To do:**
 - Raytracing for meshes.
 - Non-opaque materials.
-- Diffuse reflections.
 - Lighting.
 
 # Screenshots
