@@ -9,7 +9,7 @@ WIP. Working on a raytrace engine to raytrace meshes. Implemented using HLSL com
 **To do:**
 - Raytracing for meshes.
 - Non-opaque materials.
-- Lighting.
+- Phong reflections.
 
 # Screenshots
 
