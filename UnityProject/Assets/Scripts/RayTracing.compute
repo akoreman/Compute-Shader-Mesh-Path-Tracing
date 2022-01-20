@@ -4,6 +4,8 @@
 #define inf 1000000
 #define MAX_BOUNCES 8
 
+#include "SceneItems.hlsl"
+
 // These are set from RayMarcher.cs /////////
 Texture2D<float4> Source;
 RWTexture2D<float4> Target;
@@ -15,134 +17,69 @@ float4 _CameraRotation;
 
 Texture2D<float4> _SkyBoxTexture;
 SamplerState sampler_SkyBoxTexture;
+
+float4 _LightVector;
+StructuredBuffer<Sphere> _SphereBuffer;
+
+float2 _PixelOffset;
 ///////////////////////////////////////////
 
-struct Ray
-{
-	float3 Origin;
-	float3 Direction;
-	float3 Energy;
-};
 
-Ray CreateRay(float3 Origin, float3 Direction)
-{
-	Ray ray;
 
-	ray.Origin = Origin;
-	ray.Direction = Direction;
-	ray.Energy = float3(1,1,1);
 
-	return ray;
-}
+#include "Random.hlsl"
+#include "RayFunctions.hlsl"
+#include "RayGeometry.hlsl"
 
-Ray CreateCameraRay(float2 xy)
-{
-	//float3 Origin = mul(_CameraToWorldProj, float4(0,0,0,1)).xyz;
-	float3 Origin = _CameraPosition.xyz;
 
-    float3 Direction = mul(_CameraInverseProj, float4(xy,0,1)).xyz;
-    Direction = mul(_CameraToWorldProj, float4(Direction,0)).xyz;
-    Direction = normalize(Direction);
-
-	return CreateRay(Origin,Direction);
-}
-
-struct RayCollision
-{
-	float3 Position;
-	float Distance;
-	float3 positionNormal;
-};
-
-RayCollision CreateRayCollision()
-{
-	RayCollision Collision;
-
-	Collision.Position = float3(0,0,0);
-	Collision.Distance = inf;
-	Collision.positionNormal = float3(0,0,0);
-
-	return Collision;
-};
-
-void GroundPlaneRayIntersection(Ray ray, inout RayCollision collision)
-{
-	// Direction is unit length, so origin-plane intersection is at distance O.y/D.y, D.y < 0 if it hits the plane so we need a negative.
-	float Distance = -ray.Origin.y / ray.Direction.y;
-
-	// Check whether it points down and whether it hits the plane before reaching the skybox.
-	if (Distance > 0.0 && Distance < collision.Distance)
-	{
-		collision.Distance = Distance;
-		collision.Position = ray.Origin + Distance * ray.Direction;
-		collision.positionNormal = float3(0,1,0);
-	}
-	
-}
-
-void SphereRayIntersection(Ray ray, inout RayCollision collision, float3 sphereposition, float sphereradius)
-{
-	// Vector pointing from the Origin to the center of the sphere.
-	float3 distanceVector = ray.Origin - sphereposition;
-
-	// p1 defines the point where the ray enters the sphere, the dot product is correlated with the overlap between the distance vector and the ray direction. 
-	// Large overlap -> ray direction and distance vector close to the same direction.
-	float p1 = -dot(ray.Direction, distanceVector);
-
-	// Check whether the ray hits the sphere.
-	float p2Squared = p1*p1 - dot(distanceVector,distanceVector) + sphereradius*sphereradius;
-
-	if (p2Squared < 0)
-		return;
-	
-	// Find the point where the ray exits the sphere.
-	float p2 = sqrt(p2Squared);
-
-	// Find the distance between the ray origin and the entry (or exit) point of the sphere.
-	float Distance;
-
-	if(p1-p2 > 0)
-		Distance = p1-p2;
-	else
-		Distance = p1+p2;
-
-	if (Distance > 0.0 && Distance < collision.Distance)
-	{
-		collision.Distance = Distance;
-		collision.Position = ray.Origin + Distance * ray.Direction;
-		// Find the normal vector.
-		collision.positionNormal = normalize(collision.Position - sphereposition);
-	}
-}
 
 // Given a specific ray find the nearest collision point by iterating over each object in the scene.
 RayCollision TraceRays(Ray ray)
 {
 	RayCollision Collision = CreateRayCollision();
 
-	//GroundPlaneRayIntersection(ray, Collision);
-	SphereRayIntersection(ray, Collision, float3(0,1,0),.5);
-	SphereRayIntersection(ray, Collision, float3(2,1,2),.5);
-	SphereRayIntersection(ray, Collision, float3(0,1,2),.5);
-	SphereRayIntersection(ray, Collision, float3(2,1,0),.5);
+	GroundPlaneRayIntersection(ray, Collision);
+
+	uint numSpheres, stride;
+	_SphereBuffer.GetDimensions(numSpheres, stride);
+
+	for (uint i = 0; i < numSpheres; i++)
+		SphereRayIntersection(ray, Collision, _SphereBuffer[i]);
 
 	return Collision;
 }
 
-// Given a ray and it's nearest collision find which colour and how much it contributes to the final pixel color. Also keep track of the energy of bounced rays.
+// Given a ray and its nearest collision find which colour and how much it contributes to the final pixel color. Also keep track of the energy of bounced rays.
 float3 ShadeRay(inout Ray ray, RayCollision collision)
 {
 	if (collision.Distance < inf)
 	{	
-        float3 specular = float3(0.8f, 0.8f, 0.8f);
+		
+        //float3 specular = collision.Specular;
+		//float3 albedo = collision.Albedo;
 
+		/*
 		ray.Origin = collision.Position + collision.positionNormal + 0.001;
 
 		ray.Direction = reflect(ray.Direction, collision.positionNormal);
 
         ray.Energy *= specular;
 
-        return float3(0.0, 0.0, 0.0);
+		Ray shadowRay = CreateRay(collision.Position + 0.001 * collision.positionNormal, -1*_LightVector.xyz);
+		RayCollision shadowCollision = TraceRays(shadowRay);
+
+		if (shadowCollision.Distance < inf)
+			return float3(0,0,0);
+
+		return saturate(dot(collision.positionNormal, _LightVector.xyz) * -1) * _LightVector.w * albedo;
+		*/
+
+		ray.Origin = collision.Position + collision.positionNormal + 0.001;
+		ray.Direction = SampleHemisphere(collision.positionNormal);
+		ray.Energy *= collision.Albedo * saturate(dot(collision.positionNormal,ray.Direction));
+		
+		return float3(0,0,0);
+
 	}
 	else
 	{
@@ -159,6 +96,7 @@ float3 ShadeRay(inout Ray ray, RayCollision collision)
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     Target[id.xy] = Source[id.xy];
+	Pixel = id.xy;
 
 	uint width,height;
     Target.GetDimensions(width, height);
@@ -167,7 +105,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	int numMarchSteps = 0;
 
 	//Convert from coordinates [-width,width] and [-heigth,height] to [-1,1] and [-1,1].
-	float2 uv = id.xy / float2(width,height) * 2 - 1;
+	float2 uv =( id.xy + _PixelOffset) / float2(width,height) * 2 - 1;
 
 	// Create the camera ray for that specific pixel.
     Ray cameraRay = CreateCameraRay(uv);
