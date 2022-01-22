@@ -8,7 +8,7 @@ WIP. Working on a path trace engine to raytrace meshes. Implemented using HLSL c
 - Importance sampling to speed-up convergence.
 
 **To do:**
-- Raytracing for meshes.
+- Pathtracing for meshes.
 - Non-opaque materials.
 
 # Screenshots
