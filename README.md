@@ -1,15 +1,15 @@
-# Compute Shader Mesh Ray Tracing
-WIP. Working on a raytrace engine to raytrace meshes. Implemented using HLSL compute shaders in Unity3D.
+# Compute Shader Mesh Path Tracing
+WIP. Working on a path trace engine to raytrace meshes. Implemented using HLSL compute shaders in Unity3D.
 
 **Currently implemented:**
 - Raytracing for opaque planes and spheres.
-- Specular reflections.
+- Phong specular reflections.
 - Lambert diffuse relections.
+- Importance sampling to speed-up convergence.
 
 **To do:**
 - Raytracing for meshes.
 - Non-opaque materials.
-- Phong reflections.
 
 # Screenshots
 
