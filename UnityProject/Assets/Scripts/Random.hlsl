@@ -26,6 +26,7 @@ float3x3 GetTangentSpace(float3 normal)
     return float3x3(tangent, binormal, normal);
 }
 
+// Importance sampling using cosine weighing following https://blog.thomaspoulet.fr/uniform-sampling-on-unit-hemisphere/ .z
 float3 SampleHemisphere(float3 normal, float alpha)
 {
     // Uniformly sample hemisphere direction

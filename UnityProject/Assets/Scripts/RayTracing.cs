@@ -39,8 +39,8 @@ public class RayTracing : MonoBehaviour
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
         camera = Camera.current;
-        lightDirection = directionalLight.transform.forward;
-        lightIntensity = directionalLight.intensity;
+        //lightDirection = directionalLight.transform.forward;
+        //lightIntensity = directionalLight.intensity;
 
         // If no render target defined, set one up.
         if (target == null)
@@ -66,7 +66,7 @@ public class RayTracing : MonoBehaviour
         rayTracer.SetMatrix("_CameraInverseProj", camera.projectionMatrix.inverse);
         rayTracer.SetVector("_CameraPosition", camera.transform.position);
         rayTracer.SetVector("_CameraRotation", camera.transform.eulerAngles);
-        rayTracer.SetVector("_LightVector", new Vector4(lightDirection.x, lightDirection.y, lightDirection.z, lightIntensity));
+        //rayTracer.SetVector("_LightVector", new Vector4(lightDirection.x, lightDirection.y, lightDirection.z, lightIntensity));
 
         rayTracer.SetBuffer(0, "_SphereBuffer", sphereBuffer);
 
