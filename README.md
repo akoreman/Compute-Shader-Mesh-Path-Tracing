@@ -10,6 +10,7 @@ WIP. Working on a path trace engine to raytrace meshes. Implemented using HLSL c
 **To do:**
 - Pathtracing for meshes.
 - Non-opaque materials.
+- Directional lights + multi-importance sampling.
 
 # Screenshots
 
