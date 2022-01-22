@@ -5,7 +5,7 @@ struct Ray
 {
 	float3 Origin;
 	float3 Direction;
-	float3 Energy;
+	float3 Intensity;
 };
 
 Ray CreateRay(float3 Origin, float3 Direction)
@@ -14,14 +14,13 @@ Ray CreateRay(float3 Origin, float3 Direction)
 
 	ray.Origin = Origin;
 	ray.Direction = Direction;
-	ray.Energy = float3(1, 1, 1);
+	ray.Intensity = float3(1, 1, 1);
 
 	return ray;
 }
 
 Ray CreateCameraRay(float2 xy)
 {
-	//float3 Origin = mul(_CameraToWorldProj, float4(0,0,0,1)).xyz;
 	float3 Origin = _CameraPosition.xyz;
 
 	float3 Direction = mul(_CameraInverseProj, float4(xy, 0, 1)).xyz;
@@ -39,6 +38,8 @@ struct RayCollision
 
 	float3 Specular;
 	float3 Albedo;
+
+	float3 Emission;
 };
 
 RayCollision CreateRayCollision()
@@ -49,6 +50,7 @@ RayCollision CreateRayCollision()
 	Collision.Distance = inf;
 	Collision.positionNormal = float3(0, 0, 0);
 	Collision.Specular = float3(0, 0, 0);
+	Collision.Albedo = float3(0, 0, 0);
 	Collision.Albedo = float3(0, 0, 0);
 
 	return Collision;

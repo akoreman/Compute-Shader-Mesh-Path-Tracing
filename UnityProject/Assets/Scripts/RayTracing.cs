@@ -21,8 +21,8 @@ public class RayTracing : MonoBehaviour
     float movementSpeed;
     float rotationSpeed;
 
-    Vector3 lightDirection;
-    float lightIntensity;
+    //Vector3 lightDirection;
+    //float lightIntensity;
 
     Material _addMaterial;
     ComputeBuffer sphereBuffer;
@@ -104,6 +104,7 @@ public class RayTracing : MonoBehaviour
         public float Radius;
         public Vector3 Specular;
         public Vector3 Albedo;
+        public Vector3 Emission;
     };
 
     void SetUpGeometryBuffer()
@@ -111,23 +112,36 @@ public class RayTracing : MonoBehaviour
         List<Sphere> spheres = new List<Sphere>();
 
         Sphere sphere;
-        sphere.Position = new Vector3(0, 2f, 0);
+        sphere.Position = new Vector3(0, .5f, 0);
         sphere.Radius = .5f;
         sphere.Specular = new Vector3(0f, 0f, 0f);
-        sphere.Albedo = new Vector3(1f, 0f, 0f);
+        sphere.Albedo = new Vector3(1f, 1f, 1f);
+        sphere.Emission = new Vector3(1f,1f,1f);
 
         spheres.Add(sphere);
 
-        sphere.Position = new Vector3(2f, 2f, 1f);
+        sphere.Position = new Vector3(4f, 2f, 1f);
+        sphere.Radius = 1f;
+        sphere.Specular = new Vector3(1f, 1f, 1f);
+        sphere.Albedo = new Vector3(0f, 0f, 0f);
+        sphere.Emission = new Vector3(0f, 0f, 0f);
+
+
+        spheres.Add(sphere);
+
+        sphere.Position = new Vector3(1f, 2f, 1f);
         sphere.Radius = 1f;
         sphere.Specular = new Vector3(0f, 0f, 0f);
-        sphere.Albedo = new Vector3(0f, 1f, 0f);
+        sphere.Albedo = new Vector3(1f, 0f, 0f);
+        sphere.Emission = new Vector3(0f, 0f, 0f);
+
 
         spheres.Add(sphere);
 
-        sphereBuffer = new ComputeBuffer(spheres.Count, 40);
+        sphereBuffer = new ComputeBuffer(spheres.Count, 52);
         sphereBuffer.SetData(spheres);
     }
+
     /*
     struct Plane
     {
@@ -170,11 +184,13 @@ public class RayTracing : MonoBehaviour
 
         if (Input.GetKey("n"))
         {
+            _SampleNumber = 0;
             camera.transform.Rotate(new Vector3(0, 0, rotationSpeed * Time.deltaTime));
         }
 
         if (Input.GetKey("m"))
         {
+            _SampleNumber = 0;
             camera.transform.Rotate(new Vector3(0, 0, -rotationSpeed * Time.deltaTime));
         }
 

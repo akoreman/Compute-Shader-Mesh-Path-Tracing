@@ -3,8 +3,8 @@
 #define PI 3.141592
 #define inf 1000000
 #define MAX_BOUNCES 8
+#define ALPHA 100000
 
-#include "SceneItems.hlsl"
 
 // These are set from RayMarcher.cs /////////
 Texture2D<float4> Source;
@@ -19,18 +19,20 @@ Texture2D<float4> _SkyBoxTexture;
 SamplerState sampler_SkyBoxTexture;
 
 float4 _LightVector;
-StructuredBuffer<Sphere> _SphereBuffer;
 
 float2 _PixelOffset;
 ///////////////////////////////////////////
 
 
-
-
+#include "SceneItems.hlsl"
 #include "Random.hlsl"
 #include "RayFunctions.hlsl"
 #include "RayGeometry.hlsl"
 
+
+// Set from RayTracing.cs ////////
+StructuredBuffer<Sphere> _SphereBuffer;
+//////////////////////////////////
 
 
 // Given a specific ray find the nearest collision point by iterating over each object in the scene.
@@ -55,36 +57,41 @@ float3 ShadeRay(inout Ray ray, RayCollision collision)
 	if (collision.Distance < inf)
 	{	
 		
-        //float3 specular = collision.Specular;
-		//float3 albedo = collision.Albedo;
+		float specProb = dot(collision.Specular, float3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0));
+		float diffProb = dot(collision.Albedo, float3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0));
 
-		/*
-		ray.Origin = collision.Position + collision.positionNormal + 0.001;
+		specProb /= (specProb + diffProb);
+		diffProb = 1 - specProb;
 
-		ray.Direction = reflect(ray.Direction, collision.positionNormal);
+		float decisionFactor = rand();
 
-        ray.Energy *= specular;
+		ray.Origin = collision.Position + collision.positionNormal * 0.001;
 
-		Ray shadowRay = CreateRay(collision.Position + 0.001 * collision.positionNormal, -1*_LightVector.xyz);
-		RayCollision shadowCollision = TraceRays(shadowRay);
+		float3 Contribution;
 
-		if (shadowCollision.Distance < inf)
-			return float3(0,0,0);
+		// Diffuse
+		if (decisionFactor < diffProb)
+		{
+			ray.Direction = SampleHemisphere(collision.positionNormal, 1);
+			Contribution = 1.0/diffProb * collision.Albedo;
+		}
+		else
+		{
+			float3 perfectReflectedRay = reflect(ray.Direction, collision.positionNormal);
+			ray.Direction = SampleHemisphere(collision.positionNormal, ALPHA);
+			float cosFactorPhong = (ALPHA + 2.0) / (ALPHA + 1.0);
+			Contribution = 1.0/specProb * collision.Specular * cosFactorPhong ;
+		}
 
-		return saturate(dot(collision.positionNormal, _LightVector.xyz) * -1) * _LightVector.w * albedo;
-		*/
 
-		ray.Origin = collision.Position + collision.positionNormal + 0.001;
-		ray.Direction = SampleHemisphere(collision.positionNormal);
-		ray.Energy *= collision.Albedo * saturate(dot(collision.positionNormal,ray.Direction));
-		
-		return float3(0,0,0);
+		ray.Intensity *=  Contribution * saturate(dot(collision.positionNormal, ray.Direction));
 
+		return collision.Emission;
 	}
 	else
 	{
 		// If a ray hits nothing, sample a pixel from the skybox.
-		ray.Energy = 0.0;
+		ray.Intensity = 0.0;
 
 		float theta = acos(ray.Direction.y) / -PI;
 		float phi = atan2(ray.Direction.x, -ray.Direction.z) / -PI * 0.5f;
@@ -105,7 +112,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 	int numMarchSteps = 0;
 
 	//Convert from coordinates [-width,width] and [-heigth,height] to [-1,1] and [-1,1].
-	float2 uv =( id.xy + _PixelOffset) / float2(width,height) * 2 - 1;
+	float2 uv = (id.xy + _PixelOffset) / float2(width,height) * 2 - 1;
 
 	// Create the camera ray for that specific pixel.
     Ray cameraRay = CreateCameraRay(uv);
@@ -120,10 +127,10 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 		i++;
 
 		RayCollision Collision = TraceRays(cameraRay);
-		pixelColor += cameraRay.Energy * ShadeRay(cameraRay, Collision);
+		pixelColor += cameraRay.Intensity * ShadeRay(cameraRay, Collision);
 
 		// If the energy of the ray is depleted for all thee color channels
-		if (!any(cameraRay.Energy))
+		if (!any(cameraRay.Intensity))
 			break;
 	}
 

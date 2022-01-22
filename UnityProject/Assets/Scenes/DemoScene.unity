@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.4465782, g: 0.49641252, b: 0.5748167, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -314,4 +314,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rayTracer: {fileID: 7200000, guid: 5d3ecc91e10e8bd4783d493b91f7f36b, type: 3}
   directionalLight: {fileID: 705507994}
-  skyBoxTexture: {fileID: 2800000, guid: c1d47be90deb5584486e602ba3a9c622, type: 3}
+  skyBoxTexture: {fileID: 2800000, guid: a105db47e882af24481ac6b550f184aa, type: 3}

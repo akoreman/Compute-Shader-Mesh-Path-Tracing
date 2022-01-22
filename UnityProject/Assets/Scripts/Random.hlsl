@@ -26,10 +26,11 @@ float3x3 GetTangentSpace(float3 normal)
     return float3x3(tangent, binormal, normal);
 }
 
-float3 SampleHemisphere(float3 normal)
+float3 SampleHemisphere(float3 normal, float alpha)
 {
     // Uniformly sample hemisphere direction
-    float cosTheta = rand();
+    //float cosTheta = rand();
+    float cosTheta = pow(rand(), 1.0f / (alpha + 1.0f));
     float sinTheta = sqrt(max(0.0f, 1.0f - cosTheta * cosTheta));
     float phi = 2 * PI * rand();
     float3 tangentSpaceDir = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);

@@ -14,7 +14,8 @@ void GroundPlaneRayIntersection(Ray ray, inout RayCollision collision)
 		collision.positionNormal = float3(0, 1, 0);
 
 		collision.Specular = float3(0, 0, 0);
-		collision.Albedo = float3(0, 0, 1);
+		collision.Albedo = float3(.8, .8, .8);
+		collision.Emission = float3(0, 0, 0);
 	}
 
 }
@@ -57,6 +58,7 @@ void SphereRayIntersection(Ray ray, inout RayCollision collision, Sphere sphere)
 
 		collision.Albedo = sphere.Albedo;
 		collision.Specular = sphere.Specular;
+		collision.Emission = sphere.Emission;
 	}
 }
 
