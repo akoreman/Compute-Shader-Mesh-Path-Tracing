@@ -2,7 +2,8 @@
 WIP. Working on a path trace engine to raytrace meshes. Implemented using HLSL compute shaders in Unity3D.
 
 **Currently implemented:**
-- Raytracing for opaque planes and spheres.
+- Opaque materials.
+- Raytracing for perfect planes and spheres.
 - Phong specular reflections.
 - Lambert diffuse relections.
 - Importance sampling to speed-up convergence.
