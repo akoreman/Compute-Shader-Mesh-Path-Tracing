@@ -1,9 +1,9 @@
 # Compute Shader Mesh Path Tracing
-WIP. Working on a path trace engine to raytrace meshes. Implemented using HLSL compute shaders in Unity3D.
+Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using HLSL compute shaders in Unity3D.
 
 **Currently implemented:**
 - Opaque materials.
-- Raytracing for perfect planes and spheres.
+- Pathtracing for perfect planes and spheres.
 - Phong specular reflections.
 - Lambert diffuse relections.
 - Importance sampling to speed-up convergence.
