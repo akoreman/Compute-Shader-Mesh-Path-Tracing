@@ -6,13 +6,15 @@ WIP. Working on a path trace engine to raytrace meshes. Implemented using HLSL c
 - Phong specular reflections.
 - Lambert diffuse relections.
 - Importance sampling to speed-up convergence.
+- Pathtracing for meshes from Unity gameObjects.
 
 **To do:**
-- Pathtracing for meshes.
 - Non-opaque materials.
 - Directional lights + multi-importance sampling.
 
 # Screenshots
 
 <img src="https://raw.github.com/akoreman/Compute-Shader-Mesh-Ray-Tracing/main/images/SpecReflections.PNG" width="400">  
+
+<img src="https://raw.github.com/akoreman/Compute-Shader-Mesh-Ray-Tracing/main/images/Geometry.PNG" width="400">  
 
