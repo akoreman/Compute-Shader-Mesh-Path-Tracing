@@ -20,3 +20,5 @@ Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using
 
 <img src="https://raw.github.com/akoreman/Compute-Shader-Mesh-Ray-Tracing/main/images/Geometry.PNG" width="400">  
 
+**Normal interpolation visualised by interpolating vertex colors.**
+
