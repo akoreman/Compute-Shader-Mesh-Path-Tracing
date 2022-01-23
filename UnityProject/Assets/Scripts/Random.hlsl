@@ -7,6 +7,7 @@ float2 Pixel;
 float _Seed;
 /////////////////////////////////
 
+// One-liner to get pseudorandom numbers given some seed from the mains .cs file.
 float rand()
 {
     float result = frac(sin(_Seed / 100.0f * dot(Pixel, float2(12.9898f, 78.233f))) * 43758.5453f);
@@ -14,6 +15,7 @@ float rand()
     return result;
 }
 
+// Create a conversion matrix to generate a hemisphere relative to the normal.
 float3x3 GetTangentSpace(float3 normal)
 {
     // Choose a helper vector for the cross product
@@ -26,7 +28,7 @@ float3x3 GetTangentSpace(float3 normal)
     return float3x3(tangent, binormal, normal);
 }
 
-// Importance sampling using cosine weighing following https://blog.thomaspoulet.fr/uniform-sampling-on-unit-hemisphere/ .z
+// Importance sampling using cosine weighing, following https://blog.thomaspoulet.fr/uniform-sampling-on-unit-hemisphere/ .z
 float3 SampleHemisphere(float3 normal, float alpha)
 {
     // Uniformly sample hemisphere direction

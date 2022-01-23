@@ -1,9 +1,9 @@
 #pragma kernel CSMain
 
 #define PI 3.141592
-#define inf 1000000
+#define inf 100000000
 #define MAX_BOUNCES 8
-#define ALPHA 100000
+#define ALPHA 10000
 
 
 // These are set from RayMarcher.cs /////////
@@ -25,13 +25,19 @@ float2 _PixelOffset;
 
 
 #include "SceneItems.hlsl"
+
+StructuredBuffer<MeshObject> _MeshObjects;
+StructuredBuffer<float3> _Vertices;
+StructuredBuffer<int> _Indices;
+StructuredBuffer<float3> _Normals;
+
 #include "Random.hlsl"
 #include "RayFunctions.hlsl"
 #include "RayGeometry.hlsl"
 
 
 // Set from RayTracing.cs ////////
-StructuredBuffer<Sphere> _SphereBuffer;
+//StructuredBuffer<Sphere> _SphereBuffer;
 //////////////////////////////////
 
 
@@ -40,25 +46,73 @@ RayCollision TraceRays(Ray ray)
 {
 	RayCollision Collision = CreateRayCollision();
 
-	GroundPlaneRayIntersection(ray, Collision);
-
+	//GroundPlaneRayIntersection(ray, Collision);
+	
 	uint numSpheres, stride;
+	/*
 	_SphereBuffer.GetDimensions(numSpheres, stride);
 
 	for (uint i = 0; i < numSpheres; i++)
 		SphereRayIntersection(ray, Collision, _SphereBuffer[i]);
 
+	float3 v0 = float3(0, 0, -15);
+	float3 v1 = float3(15, 0, -15);
+	float3 v2 = float3(0, 15 * sqrt(2), -15);
+
+	TriangleCollisionPoint triangleCollisionPoint;
+
+	
+	if (TriangleRayIntersection(ray, v0, v1, v2, triangleCollisionPoint))
+		if (triangleCollisionPoint.Distance > 0 && triangleCollisionPoint.Distance < Collision.Distance)
+		{
+			Collision.Distance = triangleCollisionPoint.Distance;
+			Collision.Position = triangleCollisionPoint.Position;
+			Collision.positionNormal = normalize(cross(v1 - v0, v2 - v0));
+			Collision.Albedo = float3(1.0f, 1.0f, 1.0f);
+			Collision.Specular = float3(0.0f, 0.0f, 0.0f);
+			Collision.Emission = float3(1.0f, 1.0f, 1.0f);
+		}
+
+	 v0 = float3(15, 15 * sqrt(2), -15);
+	 v1 = float3(15, 0, -15);
+	 v2 = float3(0, 15 * sqrt(2), -15);
+
+
+	if (TriangleRayIntersection(ray, v0, v1, v2, triangleCollisionPoint))
+		if (triangleCollisionPoint.Distance > 0 && triangleCollisionPoint.Distance < Collision.Distance)
+		{
+			Collision.Distance = triangleCollisionPoint.Distance;
+			Collision.Position = triangleCollisionPoint.Position;
+			Collision.positionNormal = normalize(cross(v1 - v0, v2 - v0));
+			Collision.Albedo = float3(1.0f, 1.0f, 1.0f);
+			Collision.Specular = float3(0.0f, 0.0f, 0.0f);
+			Collision.Emission = float3(1.0f, 0.0f, 1.0f);
+		}
+	*/
+
+	// Test collisions with all the meshes in the scene.
+
+	uint count;
+	
+	_MeshObjects.GetDimensions(count, stride);
+
+	for (int j = 0; j < count; j++)
+	{
+		MeshRayIntersection(ray, Collision, _MeshObjects[j]);
+	}
+	
+
 	return Collision;
 }
 
-// Given a ray and its nearest collision find which colour and how much it contributes to the final pixel color. Also keep track of the energy of bounced rays.
+// Given a ray and its nearest collision find which colour and how much it contributes to the final pixel color. Also keep track of the intensity of bounced rays. For materials with both specular and diffuse relections randomly pick one of the two to trace a ray for, weighted
+// how strong the respective reflections are.
 float3 ShadeRay(inout Ray ray, RayCollision collision)
 {
 	if (collision.Distance < inf)
 	{	
-		
-		float specProb = dot(collision.Specular, float3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0));
-		float diffProb = dot(collision.Albedo, float3(1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0));
+		float specProb = dot(collision.Specular, float3(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f));
+		float diffProb = dot(collision.Albedo, float3(1.0f / 3.0f, 1.0f / 3.0f, 1.0f / 3.0f));
 
 		specProb /= (specProb + diffProb);
 		diffProb = 1 - specProb;
@@ -75,10 +129,10 @@ float3 ShadeRay(inout Ray ray, RayCollision collision)
 			ray.Direction = SampleHemisphere(collision.positionNormal, 1);
 			Contribution = 1.0/diffProb * collision.Albedo;
 		}
-		else
+		else // Specular
 		{
 			float3 perfectReflectedRay = reflect(ray.Direction, collision.positionNormal);
-			ray.Direction = SampleHemisphere(collision.positionNormal, ALPHA);
+			ray.Direction = SampleHemisphere(perfectReflectedRay, ALPHA);
 			float cosFactorPhong = (ALPHA + 2.0) / (ALPHA + 1.0);
 			Contribution = 1.0/specProb * collision.Specular * cosFactorPhong ;
 		}
@@ -91,7 +145,7 @@ float3 ShadeRay(inout Ray ray, RayCollision collision)
 	else
 	{
 		// If a ray hits nothing, sample a pixel from the skybox.
-		ray.Intensity = 0.0;
+		ray.Intensity = 0.0f;
 
 		float theta = acos(ray.Direction.y) / -PI;
 		float phi = atan2(ray.Direction.x, -ray.Direction.z) / -PI * 0.5f;

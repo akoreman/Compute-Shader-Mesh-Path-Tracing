@@ -1,6 +1,8 @@
 #ifndef RAY_FUNCTIONS
 #define RAY_FUNCTIONS
 
+// Structs and functions to manage rays and their collisions.
+
 struct Ray
 {
 	float3 Origin;
@@ -19,6 +21,7 @@ Ray CreateRay(float3 Origin, float3 Direction)
 	return ray;
 }
 
+// Create rays from the pixel coordinates of the target texture.
 Ray CreateCameraRay(float2 xy)
 {
 	float3 Origin = _CameraPosition.xyz;
