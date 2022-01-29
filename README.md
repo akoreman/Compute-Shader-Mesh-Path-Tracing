@@ -11,7 +11,7 @@ Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using
 - Normal interpolation using barycentric coordinates.
 - Anti-Aliasing by offset resampling.
 
-**To do:**
+**Possible extensions:**
 - Non-opaque materials.
 - Directional lights + multi-importance sampling.
 
