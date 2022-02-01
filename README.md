@@ -7,7 +7,7 @@ Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using
 - Phong specular reflections.
 - Lambert diffuse relections.
 - Importance sampling to speed-up convergence.
-- Pathtracing for meshes from Unity gameObjects.
+- Pathtracing for meshes from Unity GameObjects.
 - Support for normal interpolation using barycentric coordinates.
 - Anti-Aliasing by offset resampling.
 
