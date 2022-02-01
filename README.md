@@ -8,13 +8,13 @@ Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using
 - Lambert diffuse relections.
 - Importance sampling to speed-up convergence.
 - Pathtracing for meshes from Unity gameObjects.
-- Normal interpolation using barycentric coordinates.
+- Support for normal interpolation using barycentric coordinates.
 - Anti-Aliasing by offset resampling.
 
 **Possible extensions:**
 - Non-opaque materials.
 - Directional lights + multi-importance sampling.
-- Some form of ray-collision-detection optimization (e.g. bounding volumes/kD trees/etc.)
+- Some form of ray-collision-detection optimization (e.g. BVH/kD tree/etc.)
 
 # Screenshots
 
