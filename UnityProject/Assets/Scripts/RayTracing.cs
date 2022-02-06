@@ -17,7 +17,7 @@ public class RayTracing : MonoBehaviour
     [SerializeField]
     Light directionalLight;
 
-    private RenderTexture _converged;
+    private RenderTexture converged;
 
     public Texture skyBoxTexture;
 
@@ -27,24 +27,24 @@ public class RayTracing : MonoBehaviour
     //Vector3 lightDirection;
     //float lightIntensity;
 
-    Material _addMaterial;
+    Material addMaterial;
     ComputeBuffer sphereBuffer;
 
-    private static List<MeshObject> _meshObjects = new List<MeshObject>();
-    private static List<Vector3> _vertices = new List<Vector3>();
-    private static List<int> _indices = new List<int>();
-    private static List<Vector3> _normals = new List<Vector3>();
+    private static List<MeshObject> meshObjects = new List<MeshObject>();
+    private static List<Vector3> vertices = new List<Vector3>();
+    private static List<int> indices = new List<int>();
+    private static List<Vector3> normals = new List<Vector3>();
   
-    private ComputeBuffer _meshObjectBuffer;
-    private ComputeBuffer _vertexBuffer;
-    private ComputeBuffer _indexBuffer;
-    private ComputeBuffer _normalBuffer;
+    private ComputeBuffer meshObjectBuffer;
+    private ComputeBuffer vertexBuffer;
+    private ComputeBuffer indexBuffer;
+    private ComputeBuffer normalBuffer;
     
 
-    private static List<AddToPathEngine> _rayTracingMeshes = new List<AddToPathEngine>();
-    private static bool _meshBufferNeedRebuilding = false;
+    private static List<AddToPathEngine> rayTracingMeshes = new List<AddToPathEngine>();
+    private static bool meshBufferNeedRebuilding = false;
 
-    uint _SampleNumber = 0;
+    uint sampleNumber = 0;
 
     void Awake()
     {
@@ -71,39 +71,39 @@ public class RayTracing : MonoBehaviour
             target.Create();
         }
 
-        if (_converged == null)
+        if (converged == null)
         {
-            _converged = new RenderTexture(camera.pixelWidth, camera.pixelHeight, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
+            converged = new RenderTexture(camera.pixelWidth, camera.pixelHeight, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear);
 
-            _converged.enableRandomWrite = true;
-            _converged.Create();
+            converged.enableRandomWrite = true;
+            converged.Create();
         }
 
         //SetUpGeometryBuffer();
         BuildMeshBuffer();
 
         // Send stuff to the computer shader.
-        rayTracer.SetMatrix("_CameraToWorldProj", camera.cameraToWorldMatrix);
-        rayTracer.SetMatrix("_CameraInverseProj", camera.projectionMatrix.inverse);
-        rayTracer.SetVector("_CameraPosition", camera.transform.position);
-        rayTracer.SetVector("_CameraRotation", camera.transform.eulerAngles);
+        rayTracer.SetMatrix("_cameraToWorldProj", camera.cameraToWorldMatrix);
+        rayTracer.SetMatrix("_cameraInverseProj", camera.projectionMatrix.inverse);
+        rayTracer.SetVector("_cameraPosition", camera.transform.position);
+        rayTracer.SetVector("_cameraRotation", camera.transform.eulerAngles);
         //rayTracer.SetVector("_LightVector", new Vector4(lightDirection.x, lightDirection.y, lightDirection.z, lightIntensity));
 
         //rayTracer.SetBuffer(0, "_SphereBuffer", sphereBuffer);
-        rayTracer.SetBuffer(0, "_MeshObjects", _meshObjectBuffer);
-        rayTracer.SetBuffer(0, "_Vertices", _vertexBuffer);
-        rayTracer.SetBuffer(0, "_Indices", _indexBuffer);
-        rayTracer.SetBuffer(0, "_Normals", _normalBuffer);
+        rayTracer.SetBuffer(0, "_meshObjects", meshObjectBuffer);
+        rayTracer.SetBuffer(0, "_vertices", vertexBuffer);
+        rayTracer.SetBuffer(0, "_indices", indexBuffer);
+        rayTracer.SetBuffer(0, "_normals", normalBuffer);
 
         //rayTracer.SetBuffer(0, "_speculars", _specularsBuffer);
 
-        rayTracer.SetFloat("_Seed", UnityEngine.Random.value);
+        rayTracer.SetFloat("_seed", UnityEngine.Random.value);
 
-        rayTracer.SetTexture(0, "Source", source);
-        rayTracer.SetTexture(0, "Target", target);
-        rayTracer.SetTexture(0, "_SkyBoxTexture", skyBoxTexture);
+        rayTracer.SetTexture(0, "_source", source);
+        rayTracer.SetTexture(0, "_target", target);
+        rayTracer.SetTexture(0, "_skyBoxTexture", skyBoxTexture);
 
-        rayTracer.SetVector("_PixelOffset", new Vector2(UnityEngine.Random.value, UnityEngine.Random.value));
+        rayTracer.SetVector("_pixelOffset", new Vector2(UnityEngine.Random.value, UnityEngine.Random.value));
 
 
         int threadGroupsX = (int)Mathf.Ceil(camera.pixelWidth / 8f);
@@ -112,15 +112,15 @@ public class RayTracing : MonoBehaviour
         // Run the compute shdader and render the final texture to screen.
         rayTracer.Dispatch(0, threadGroupsX, threadGroupsY, 1);
 
-        if (_addMaterial == null)
-            _addMaterial = new Material(Shader.Find("Hidden/multipleSampleShader"));
+        if (addMaterial == null)
+            addMaterial = new Material(Shader.Find("Hidden/multipleSampleShader"));
 
-        _addMaterial.SetFloat("_SampleNumber", _SampleNumber);
+        addMaterial.SetFloat("_sampleNumber", sampleNumber);
 
-        Graphics.Blit(target, _converged, _addMaterial);
-        Graphics.Blit(_converged, destination);
+        Graphics.Blit(target, converged, addMaterial);
+        Graphics.Blit(converged, destination);
 
-        _SampleNumber++;
+        sampleNumber++;
 
         ReleaseBuffer();
     }
@@ -171,7 +171,7 @@ public class RayTracing : MonoBehaviour
     */
     void OnEnable()
     {
-        _SampleNumber = 0;
+        sampleNumber = 0;
         //BuildMeshBuffer();
     }
 
@@ -204,13 +204,13 @@ public class RayTracing : MonoBehaviour
 
         if (Input.GetKey("n"))
         {
-            _SampleNumber = 0;
+            sampleNumber = 0;
             camera.transform.Rotate(new Vector3(0, 0, rotationSpeed * Time.deltaTime));
         }
 
         if (Input.GetKey("m"))
         {
-            _SampleNumber = 0;
+            sampleNumber = 0;
             camera.transform.Rotate(new Vector3(0, 0, -rotationSpeed * Time.deltaTime));
         }
 
@@ -227,19 +227,19 @@ public class RayTracing : MonoBehaviour
 
         if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
         {
-            _SampleNumber = 0;
+            sampleNumber = 0;
         }
 
         if (Input.GetKey("space"))
         {
-            _SampleNumber = 0;
+            sampleNumber = 0;
             Vector3 Direction = camera.transform.forward;
             currentPosition += Direction * movementSpeed * Time.deltaTime;
         }
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
-            _SampleNumber = 0;
+            sampleNumber = 0;
             Vector3 Direction = camera.transform.forward;
             currentPosition -= Direction * movementSpeed * Time.deltaTime;
         }
@@ -258,93 +258,94 @@ public class RayTracing : MonoBehaviour
         if (sphereBuffer != null)
             sphereBuffer.Release();
  
-        if (_meshObjectBuffer != null)
-            _meshObjectBuffer.Release();
+        if (meshObjectBuffer != null)
+            meshObjectBuffer.Release();
 
-        if (_vertexBuffer != null)
-            _vertexBuffer.Release();
+        if (vertexBuffer != null)
+            vertexBuffer.Release();
 
-        if (_indexBuffer != null)
-            _indexBuffer.Release();
+        if (indexBuffer != null)
+            indexBuffer.Release();
 
-        if (_normalBuffer != null)
-            _normalBuffer.Release();
+        if (normalBuffer != null)
+            normalBuffer.Release();
 
     }
 
 
     public static void RegisterObject(AddToPathEngine obj)
     {
-        _rayTracingMeshes.Add(obj);
-        _meshBufferNeedRebuilding = true;
+        rayTracingMeshes.Add(obj);
+        meshBufferNeedRebuilding = true;
     }
     public static void UnregisterObject(AddToPathEngine obj)
     {
-        _rayTracingMeshes.Remove(obj);
-        _meshBufferNeedRebuilding = true;
+        rayTracingMeshes.Remove(obj);
+        meshBufferNeedRebuilding = true;
     }
 
     struct MeshObject
     {
         public Matrix4x4 localToWorldMatrix;
-        public int indices_offset;
-        public int indices_count;
-        public Vector3 Specular;
-        public Vector3 Albedo;
-        public Vector3 Emission;
+        public int indicesOffset;
+        public int indicesCount;
+        public Vector3 specular;
+        public Vector3 albedo;
+        public Vector3 emission;
+        public int alpha;
     }
 
     private void BuildMeshBuffer()
     {
-        _meshBufferNeedRebuilding = false;
+        meshBufferNeedRebuilding = false;
 
-        _meshObjects.Clear();
-        _vertices.Clear();
-        _indices.Clear();
-        _normals.Clear();
+        meshObjects.Clear();
+        vertices.Clear();
+        indices.Clear();
+        normals.Clear();
 
         // Add all vertices, indices and material properties to the relevant buffers.
-        foreach (AddToPathEngine obj in _rayTracingMeshes)
+        foreach (AddToPathEngine obj in rayTracingMeshes)
         {
             Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
 
-            int firstVertex = _vertices.Count;
-            _vertices.AddRange(mesh.vertices);
+            int firstVertex = vertices.Count;
+            vertices.AddRange(mesh.vertices);
 
-            int firstIndex = _indices.Count;
+            int firstIndex = RayTracing.indices.Count;
             var indices = mesh.GetIndices(0);
 
             var normals = mesh.normals;
-            _normals.AddRange(normals);
+            RayTracing.normals.AddRange(normals);
              
             var indicesOffset = Array.ConvertAll(indices, x => x + firstVertex);
 
-            _indices.AddRange(indicesOffset);
+            RayTracing.indices.AddRange(indicesOffset);
 
-            _meshObjects.Add(new MeshObject()
+            meshObjects.Add(new MeshObject()
             {
                 localToWorldMatrix = obj.transform.localToWorldMatrix,
-                indices_offset = firstIndex,
-                indices_count = indices.Length,
-                Specular = obj.Specular,
-                Albedo = obj.Albedo,
-                Emission = obj.Emission
+                indicesOffset = firstIndex,
+                indicesCount = indices.Length,
+                specular = obj.specular,
+                albedo = obj.albedo,
+                emission = obj.emission,
+                alpha = obj.alpha
             });
         }
 
         // Set-up the buffers.
-        _meshObjectBuffer = new ComputeBuffer(_meshObjects.Count, 108);
-        _meshObjectBuffer.SetData(_meshObjects);
+        meshObjectBuffer = new ComputeBuffer(meshObjects.Count, 112);
+        meshObjectBuffer.SetData(meshObjects);
 
-        _vertexBuffer = new ComputeBuffer(_vertices.Count, 12);
-        _vertexBuffer.SetData(_vertices);
+        vertexBuffer = new ComputeBuffer(vertices.Count, 12);
+        vertexBuffer.SetData(vertices);
 
-        _indexBuffer = new ComputeBuffer(_indices.Count, 4);
-        _indexBuffer.SetData(_indices);
+        indexBuffer = new ComputeBuffer(indices.Count, 4);
+        indexBuffer.SetData(indices);
 
-        _normalBuffer = new ComputeBuffer(_normals.Count, 12);
-        _normalBuffer.SetData(_normals);
-
+        normalBuffer = new ComputeBuffer(normals.Count, 12);
+        normalBuffer.SetData(normals);
 
     }
 }

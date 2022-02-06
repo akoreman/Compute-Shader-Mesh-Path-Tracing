@@ -41,11 +41,11 @@ Shader "Hidden/multipleSampleShader"
 
             sampler2D _MainTex;
 
-            float _SampleNumber;
+            float _sampleNumber;
 
-			float4 frag (v2f i) : SV_Target
-			{
-				return float4(tex2D(_MainTex, i.uv).rgb, 1.0f / (_SampleNumber + 1.0f));
+            float4 frag(v2f i) : SV_Target
+            {
+                return float4(tex2D(_MainTex, i.uv).rgb, 1.0f / (_sampleNumber + 1.0f));
 			}
             ENDCG
         }

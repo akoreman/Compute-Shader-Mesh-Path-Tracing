@@ -10,12 +10,39 @@ using UnityEngine;
 
 public class AddToPathEngine : MonoBehaviour
 {
-    public Vector3 Specular = new Vector3(0f,0f,0f);
-    public Vector3 Albedo = new Vector3(0f, 0f, 0f);
-    public Vector3 Emission = new Vector3(0f, 0f, 0f);
+    public bool hasSpecular;
+    public Vector3 specular;
+    public int alpha;
+
+    public bool hasAlbedo;
+    public Vector3 albedo = new Vector3(0f, 0f, 0f);
+
+    public bool hasEmission;
+    public Vector3 emissionColor = new Vector3(0f, 0f, 0f);
+    public float emissionStrength = 0.0f;
+
+    [HideInInspector]
+    public Vector3 emission;
 
     private void OnEnable()
     {
+        if (!hasAlbedo)
+            albedo = new Vector3(0f, 0f, 0f);
+
+        specular = Vector3.Normalize(specular);
+
+
+        if (!hasSpecular)
+            specular = new Vector3(0f, 0f, 0f);
+
+        albedo = Vector3.Normalize(albedo);
+
+        if (!hasEmission)
+            emissionColor = new Vector3(0f, 0f, 0f);
+
+        emissionColor = Vector3.Normalize(emissionColor) ;
+        emission = emissionStrength * emissionColor;
+
         RayTracing.RegisterObject(this);
     }
     private void OnDisable()

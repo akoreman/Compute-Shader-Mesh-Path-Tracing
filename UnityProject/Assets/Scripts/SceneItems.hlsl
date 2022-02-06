@@ -5,21 +5,22 @@
 
 struct Sphere
 {
-	float3 Position;
-	float Radius;
-	float3 Specular;
-	float3 Albedo;
-	float3 Emission;
+	float3 position;
+	float radius;
+	float3 specular;
+	float3 albedo;
+	float3 emission;
 };
 
 struct MeshObject
 {
 	float4x4 localToWorldMatrix;
-	int indices_offset;
-	int indices_count;
-	float3 Specular;
-	float3 Albedo;
-	float3 Emission;
+	int indicesOffset;
+	int indicesCount;
+	float3 specular;
+	float3 albedo;
+	float3 emission;
+	int alpha;
 };
 
 #endif
