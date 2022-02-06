@@ -7,7 +7,7 @@
 
 
 // These are set from RayMarcher.cs /////////
-Texture2D<float4> _source;
+//Texture2D<float4> _source;
 RWTexture2D<float4> _target;
 float4x4 _cameraToWorldProj;
 float4x4 _cameraInverseProj;
@@ -49,6 +49,7 @@ RayCollision TraceRays(Ray ray)
 	//GroundPlaneRayIntersection(ray, Collision);
 	
 	uint numSpheres, stride;
+	
 	/*
 	_SphereBuffer.GetDimensions(numSpheres, stride);
 
@@ -160,17 +161,17 @@ float3 ShadeRay(inout Ray ray, RayCollision collision)
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    _target[id.xy] = _source[id.xy];
-	Pixel = id.xy;
+    //_target[id.xy] = _source[id.xy];
+	pixel = id.xy;
 
 	uint width,height;
     _target.GetDimensions(width, height);
 
-	float marchDistance = 0;
-	int numMarchSteps = 0;
+	//float marchDistance = 0;
+	//int numMarchSteps = 0;
 
 	//Convert from coordinates [-width,width] and [-heigth,height] to [-1,1] and [-1,1].
-	float2 uv = (id.xy + _pixelOffset) / float2(width,height) * 2 - 1;
+    float2 uv = (id.xy + _pixelOffset) / float2(width, height) * 2 - 1;
 
 	// Create the camera ray for that specific pixel.
     Ray cameraRay = CreateCameraRay(uv);
@@ -192,5 +193,5 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 			break;
 	}
 
-	_target[id.xy] = float4(pixelColor,1);
+    _target[id.xy] = float4(pixelColor, 1);
 }

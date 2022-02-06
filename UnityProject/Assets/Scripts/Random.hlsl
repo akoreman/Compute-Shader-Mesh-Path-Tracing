@@ -1,17 +1,17 @@
 #ifndef RANDOM
 #define RANDOM
 
-float2 Pixel;
+float2 pixel;
 
 // Set from RayTracing.cs ////////
-float _Seed;
+float _seed;
 /////////////////////////////////
 
 // One-liner to get pseudorandom numbers given some seed from the mains .cs file.
 float rand()
 {
-    float result = frac(sin(_Seed / 100.0f * dot(Pixel, float2(12.9898f, 78.233f))) * 43758.5453f);
-    _Seed += 1.0f;
+    float result = frac(sin(_seed / 100.0f * dot(pixel, float2(12.9898f, 78.233f))) * 43758.5453f);
+    _seed += 1.0f;
     return result;
 }
 

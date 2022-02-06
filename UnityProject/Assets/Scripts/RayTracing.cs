@@ -52,7 +52,6 @@ public class RayTracing : MonoBehaviour
         movementSpeed = 0.1f;
         rotationSpeed = 60f;
         //camera = Camera.current;
-
     }
 
 
@@ -99,7 +98,7 @@ public class RayTracing : MonoBehaviour
 
         rayTracer.SetFloat("_seed", UnityEngine.Random.value);
 
-        rayTracer.SetTexture(0, "_source", source);
+        //rayTracer.SetTexture(0, "_source", source);
         rayTracer.SetTexture(0, "_target", target);
         rayTracer.SetTexture(0, "_skyBoxTexture", skyBoxTexture);
 
@@ -119,6 +118,7 @@ public class RayTracing : MonoBehaviour
 
         Graphics.Blit(target, converged, addMaterial);
         Graphics.Blit(converged, destination);
+
 
         sampleNumber++;
 
