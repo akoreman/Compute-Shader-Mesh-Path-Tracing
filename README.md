@@ -5,6 +5,7 @@ Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using
 - Opaque materials.
 - Pathtracing for perfect planes and spheres.
 - Phong specular reflections.
+- Variable surface roughness for specular reflections.
 - Lambert diffuse relections.
 - Importance sampling to speed-up convergence.
 - Pathtracing for meshes from Unity GameObjects.
