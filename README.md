@@ -2,7 +2,6 @@
 Path tracing engine to raytrace meshes from Unity gameObjects. Implemented using HLSL compute shaders in Unity3D.
 
 **Currently implemented:**
-- Opaque materials.
 - Pathtracing for perfect planes and spheres.
 - Phong specular reflections.
 - Variable surface roughness for specular reflections.
