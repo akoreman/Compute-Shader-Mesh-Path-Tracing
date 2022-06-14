@@ -2,7 +2,7 @@
 Path tracing engine to raytrace meshes from Unity GameObjects. Implemented using HLSL compute shaders in Unity3D.
 
 **Currently implemented:**
-- Pathtracing for perfect planes and spheres.
+<!--- - Pathtracing for perfect planes and spheres. -->
 - Pathtracing for meshes from Unity GameObjects.
 - Phong specular reflections.
 - Variable surface roughness for specular reflections.
