@@ -21,6 +21,9 @@ public class AddToPathEngine : MonoBehaviour
     public Vector3 emissionColor = new Vector3(0f, 0f, 0f);
     public float emissionStrength = 0.0f;
 
+    Vector3 centerPosition;
+    float radius;
+
     [HideInInspector]
     public Vector3 emission;
 
@@ -44,9 +47,28 @@ public class AddToPathEngine : MonoBehaviour
         emission = emissionStrength * emissionColor;
 
         RayTracing.RegisterObject(this);
+
+
     }
+
     private void OnDisable()
     {
         RayTracing.UnregisterObject(this);
+    }
+
+    Vector3 meshAverage(Mesh mesh)
+    {
+        Vector3[] vertexList = mesh.vertices;
+
+        Vector3 average = Vector3.zero;
+        int count = 0;
+
+        foreach (Vector3 vertex in vertexList)
+        {
+            average += vertex;
+            count++;
+        }
+
+        return average / count;
     }
 }

@@ -3322,17 +3322,9 @@ MonoBehaviour:
   assetGuid: 
   m_Mesh: {fileID: 160132371}
   m_IsSelectable: 1
-  m_SelectedFaces: 00000000
-  m_SelectedEdges:
-  - a: 0
-    b: 1
-  - a: 2
-    b: 0
-  - a: 1
-    b: 3
-  - a: 3
-    b: 2
-  m_SelectedVertices: 00000000010000000200000003000000
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
 --- !u!4 &96482899
 Transform:
   m_ObjectHideFlags: 0
@@ -6612,7 +6604,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rayTracer: {fileID: 7200000, guid: 5d3ecc91e10e8bd4783d493b91f7f36b, type: 3}
   directionalLight: {fileID: 705507994}
-  skyBoxTexture: {fileID: 2800000, guid: c1d47be90deb5584486e602ba3a9c622, type: 3}
+  skyBoxTexture: {fileID: 2800000, guid: a105db47e882af24481ac6b550f184aa, type: 3}
 --- !u!1001 &1306028894
 PrefabInstance:
   m_ObjectHideFlags: 0
