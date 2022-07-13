@@ -21,7 +21,7 @@ void GroundPlaneRayIntersection(Ray ray, inout RayCollision collision)
 	}
 
 }
-
+/*
 void SphereRayIntersection(Ray ray, inout RayCollision collision, Sphere sphere)//, float3 sphereposition, float sphereradius)
 {
 	float3 spherePosition = sphere.position;
@@ -62,6 +62,51 @@ void SphereRayIntersection(Ray ray, inout RayCollision collision, Sphere sphere)
 		collision.specular = sphere.specular;
 		collision.emission = sphere.emission;
 	}
+}
+*/
+bool SphereRayIntersection(Ray ray, Sphere sphere)
+{
+	float3 spherePosition = sphere.position;
+	float sphereRadius = sphere.radius;
+
+	// Vector pointing from the Origin to the center of the sphere.
+	float3 distanceVector = ray.origin - spherePosition;
+
+	// p1 defines the point where the ray enters the sphere, the dot product is correlated with the overlap between the distance vector and the ray direction. 
+	// Large overlap -> ray direction and distance vector close to the same direction.
+	float p1 = -dot(ray.direction, distanceVector);
+
+	// Check whether the ray hits the sphere.
+	float p2Squared = p1 * p1 - dot(distanceVector, distanceVector) + sphereRadius * sphereRadius;
+
+	if (p2Squared < 0)
+		return false;
+
+	return true;
+	/*
+	// Find the point where the ray exits the sphere.
+	float p2 = sqrt(p2Squared);
+
+	// Find the distance between the ray origin and the entry (or exit) point of the sphere.
+	float distance;
+
+	if (p1 - p2 > 0)
+		distance = p1 - p2;
+	else
+		distance = p1 + p2;
+
+	if (distance > 0.0 && distance < collision.distance)
+	{
+		collision.distance = distance;
+		collision.position = ray.origin + distance * ray.direction;
+		// Find the normal vector.
+		collision.positionNormal = normalize(collision.position - spherePosition);
+
+		collision.albedo = sphere.albedo;
+		collision.specular = sphere.specular;
+		collision.emission = sphere.emission;
+	}
+	*/
 }
 
 struct TriangleCollisionPoint

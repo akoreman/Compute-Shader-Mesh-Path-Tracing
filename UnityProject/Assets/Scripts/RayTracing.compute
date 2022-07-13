@@ -37,7 +37,7 @@ StructuredBuffer<float3> _normals;
 
 
 // Set from RayTracing.cs ////////
-//StructuredBuffer<Sphere> _SphereBuffer;
+StructuredBuffer<Sphere> _SphereBuffer;
 //////////////////////////////////
 
 
@@ -99,7 +99,8 @@ RayCollision TraceRays(Ray ray)
 
 	for (int j = 0; j < count; j++)
 	{
-		MeshRayIntersection(ray, collision, _meshObjects[j]);
+		if (SphereRayIntersection(ray, _SphereBuffer[j] ))
+			MeshRayIntersection(ray, collision, _meshObjects[j] );
 	}
 	
 

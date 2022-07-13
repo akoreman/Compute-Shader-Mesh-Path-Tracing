@@ -7,9 +7,9 @@ struct Sphere
 {
 	float3 position;
 	float radius;
-	float3 specular;
-	float3 albedo;
-	float3 emission;
+	//float3 specular;
+	//float3 albedo;
+	//float3 emission;
 };
 
 struct MeshObject

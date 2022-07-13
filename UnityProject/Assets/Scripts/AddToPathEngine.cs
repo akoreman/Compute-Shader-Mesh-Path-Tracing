@@ -46,29 +46,13 @@ public class AddToPathEngine : MonoBehaviour
         emissionColor = Vector3.Normalize(emissionColor) ;
         emission = emissionStrength * emissionColor;
 
+        
+
         RayTracing.RegisterObject(this);
-
-
     }
 
     private void OnDisable()
     {
         RayTracing.UnregisterObject(this);
-    }
-
-    Vector3 meshAverage(Mesh mesh)
-    {
-        Vector3[] vertexList = mesh.vertices;
-
-        Vector3 average = Vector3.zero;
-        int count = 0;
-
-        foreach (Vector3 vertex in vertexList)
-        {
-            average += vertex;
-            count++;
-        }
-
-        return average / count;
     }
 }

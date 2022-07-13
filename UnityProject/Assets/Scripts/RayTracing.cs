@@ -28,7 +28,9 @@ public class RayTracing : MonoBehaviour
     //float lightIntensity;
 
     Material addMaterial;
+
     ComputeBuffer sphereBuffer;
+    private static List<Sphere> spheres = new List<Sphere>();
 
     private static List<MeshObject> meshObjects = new List<MeshObject>();
     private static List<Vector3> vertices = new List<Vector3>();
@@ -79,6 +81,7 @@ public class RayTracing : MonoBehaviour
         }
 
         //SetUpGeometryBuffer();
+        //BuildSphereBuffer();
         BuildMeshBuffer();
 
         // Send stuff to the computer shader.
@@ -88,7 +91,7 @@ public class RayTracing : MonoBehaviour
         rayTracer.SetVector("_cameraRotation", camera.transform.eulerAngles);
         //rayTracer.SetVector("_LightVector", new Vector4(lightDirection.x, lightDirection.y, lightDirection.z, lightIntensity));
 
-        //rayTracer.SetBuffer(0, "_SphereBuffer", sphereBuffer);
+        rayTracer.SetBuffer(0, "_SphereBuffer", sphereBuffer);
         rayTracer.SetBuffer(0, "_meshObjects", meshObjectBuffer);
         rayTracer.SetBuffer(0, "_vertices", vertexBuffer);
         rayTracer.SetBuffer(0, "_indices", indexBuffer);
@@ -124,55 +127,17 @@ public class RayTracing : MonoBehaviour
 
         ReleaseBuffer();
     }
-    /*
+    
     struct Sphere
     {
         public Vector3 Position;
         public float Radius;
-        public Vector3 Specular;
-        public Vector3 Albedo;
-        public Vector3 Emission;
     };
-    
-    void SetUpGeometryBuffer()
-    {
-        List<Sphere> spheres = new List<Sphere>();
-
-        Sphere sphere;
-        sphere.Position = new Vector3(0, .5f, 0);
-        sphere.Radius = .5f;
-        sphere.Specular = new Vector3(0f, 0f, 0f);
-        sphere.Albedo = new Vector3(1f, 1f, 1f);
-        sphere.Emission = new Vector3(1f,1f,1f);
-
-        spheres.Add(sphere);
-
-        sphere.Position = new Vector3(4f, 2f, 1f);
-        sphere.Radius = 1f;
-        sphere.Specular = new Vector3(1f, 1f, 1f);
-        sphere.Albedo = new Vector3(0f, 0f, 0f);
-        sphere.Emission = new Vector3(0f, 0f, 0f);
-
-
-        spheres.Add(sphere);
-
-        sphere.Position = new Vector3(1f, 2f, 1f);
-        sphere.Radius = 1f;
-        sphere.Specular = new Vector3(0f, 0f, 0f);
-        sphere.Albedo = new Vector3(1f, 0f, 0f);
-        sphere.Emission = new Vector3(0f, 0f, 0f);
-
-
-        spheres.Add(sphere);
-
-        sphereBuffer = new ComputeBuffer(spheres.Count, 52);
-        sphereBuffer.SetData(spheres);
-    }
-    */
+   
     void OnEnable()
     {
         sampleNumber = 0;
-        //BuildMeshBuffer();
+        BuildMeshBuffer();
     }
 
     void Update()
@@ -323,6 +288,8 @@ public class RayTracing : MonoBehaviour
 
             RayTracing.indices.AddRange(indicesOffset);
 
+            Matrix4x4 localToWorld = obj.gameObject.transform.localToWorldMatrix;
+
             meshObjects.Add(new MeshObject()
             {
                 localToWorldMatrix = obj.transform.localToWorldMatrix,
@@ -332,6 +299,12 @@ public class RayTracing : MonoBehaviour
                 albedo = obj.albedo,
                 emission = obj.emission,
                 alpha = obj.alpha
+            });
+
+            spheres.Add(new Sphere(){
+                Position = meshAverage(mesh, localToWorld),
+                Radius = 100000f
+                //Radius = meshRadius(mesh, localToWorld)
             });
         }
 
@@ -348,5 +321,63 @@ public class RayTracing : MonoBehaviour
         normalBuffer = new ComputeBuffer(normals.Count, 12);
         normalBuffer.SetData(normals);
 
+        sphereBuffer = new ComputeBuffer(spheres.Count, 16);
+        sphereBuffer.SetData(spheres);
+
+    }
+
+    
+
+    Vector3 meshAverage(Mesh mesh, Matrix4x4 localToWorld)
+    {
+        Vector3[] vertexList = mesh.vertices;
+
+        Vector3 average = Vector3.zero;
+        int count = 0;
+
+        foreach (Vector3 vertex in vertexList)
+        {
+            //print(vertex);
+            //localToWorld.MultiplyPoint3x4(mf.mesh.vertices[i]);
+            average += localToWorld.MultiplyPoint3x4(vertex);
+            count++;
+
+        }
+        //print(average);
+        return average / count;
+    }
+
+    float meshRadius(Mesh mesh, Matrix4x4 localToWorld)
+    {
+        Vector3[] vertexList = mesh.vertices;
+
+        float minX = 100000000000000;
+        float minY = 100000000000000;
+        float minZ = 100000000000000;
+        float maxX = 0;
+        float maxY = 0;
+        float maxZ = 0;
+
+        foreach (Vector3 vertexIt in vertexList)
+        {
+            Vector3 vertex = localToWorld.MultiplyPoint3x4(vertexIt);
+
+            if (vertex.x < minX) { minX = vertex.x; }
+            if (vertex.y < minY) { minY = vertex.y; }
+            if (vertex.z < minZ) { minY = vertex.z; }
+
+            if (vertex.x > maxX) { maxX = vertex.x; }
+            if (vertex.y > maxY) { maxY = vertex.y; }
+            if (vertex.z > maxZ) { maxZ = vertex.z; }
+        }
+
+        float radius = 0;
+
+        if (maxX - minX > radius) {radius = maxX - minX; }
+        if (maxY - minY > radius) {radius = maxY - minY; }
+        if (maxZ - minZ > radius) {radius = maxZ - minZ; }
+
+        return Mathf.Abs(radius);
     }
 }
+
