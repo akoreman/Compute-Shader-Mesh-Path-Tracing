@@ -10,11 +10,12 @@ Path tracing engine to raytrace meshes from Unity GameObjects. Implemented using
 - Importance sampling to speed-up convergence.
 - Support for normal interpolation using barycentric coordinates.
 - Anti-Aliasing by offset resampling.
+- Basic ray-collision-detection optimization using bounding sphere volumes.
 
 **Possible extensions:**
 - Translucent materials.
 - Directional lights + multi-importance sampling (see https://graphics.stanford.edu/courses/cs348b-03/papers/veach-chapter9.pdf).
-- Some form of ray-collision-detection optimization (e.g. BVH/kD tree/etc.)
+- More advanced ray-collision-detection optimization (e.g. BVH/kD tree/etc.)
 
 # Screenshots
 
