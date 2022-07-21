@@ -15,7 +15,7 @@ Path tracing engine to raytrace meshes from Unity GameObjects. Implemented using
 **Possible extensions:**
 - Translucent materials.
 - Directional lights + multi-importance sampling (see https://graphics.stanford.edu/courses/cs348b-03/papers/veach-chapter9.pdf).
-- More advanced ray-collision-detection optimization (e.g. BVH/kD tree/etc.)
+- Improved ray-collision-detection optimization (e.g. BVH/kD tree/etc.)
 
 # Screenshots
 
